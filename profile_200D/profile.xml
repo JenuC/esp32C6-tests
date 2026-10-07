@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <profile>
+    <profile_version>1</profile_version>
+    <description_file>XB3-24A/XB3-24A_200D-th.xml</description_file>
+    <flash_fw_action>1</flash_fw_action>
+    <description xml:space="preserve"></description>
+    <reset_settings>false</reset_settings>
+    <format_file_system>false</format_file_system>
+    <settings>
+      <setting command="CH">F</setting>
+      <setting command="ID">F01</setting>
+      <setting command="MY">1</setting>
+      <setting command="*S">0</setting>
+      <setting command="*V">0</setting>
+      <setting command="*W">0</setting>
+      <setting command="*X">0</setting>
+      <setting command="*Y">0</setting>
+      <setting command="EA">1</setting>
+      <setting command="$S">0</setting>
+      <setting command="$V">0</setting>
+      <setting command="$W">0</setting>
+      <setting command="$X">0</setting>
+      <setting command="$Y">0</setting>
+    </settings>
+  </profile>
+</data>
