@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<firmwares>
+  <firmware fw_version="4001">
+    <family>XBee</family>
+    <product_name>XB-BLU</product_name>
+    <hw_version>0x5D</hw_version>
+    <compatibility_number>2</compatibility_number>
+    <bootloader_version>1.11.5</bootloader_version>
+    <min_xctu_version>6.5.14</min_xctu_version>
+    <region>99</region>
+    <config_buffer_loc>0</config_buffer_loc>
+    <flash_page_size>0x80</flash_page_size>
+    <crc_buffer_len>0</crc_buffer_len>
+    <function>Digi XBee BLU TH</function>
+    <update_timeout_ms>30000</update_timeout_ms>
+    <categories>
+      <category name="Bluetooth Options">
+        <description>Change Bluetooth behavior</description>
+        <settings>
+          <setting command="BT">
+            <name>Bluetooth Enable</name>
+            <description>Configure the module to enable Bluetooth.</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>Enabled</item>
+            </items>
+          </setting>
+          <setting command="BL">
+            <name>Bluetooth MAC Address</name>
+            <description>Read the module's EUI-48 Bluetooth MAC address</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="BI">
+            <name>Bluetooth Identifier</name>
+            <description>Configure the name that appears in BLE advertisements, up to 22 characters. If set to default (0x20 - ASCII space character), the default name of 'XBee BLU' will be used.
+Advanced customization of the BLE advertisement data can be done through the `digi.ble` module in MicroPython.</description>
+            <default_value>0x20</default_value>
+            <control_type>text</control_type>
+            <max_chars>22</max_chars>
+            <min_chars>1</min_chars>
+            <format>ASCII</format>
+            <exception></exception>
+          </setting>
+          <setting command="BP">
+            <name>BLE Advertisements Power Level</name>
+            <description>Set the output power level that will be used for Bluetooth Advertisements.</description>
+            <default_value>0x3</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>-20 dBm</item>
+              <item>-10 dBm</item>
+              <item>0 dBm</item>
+              <item>8 dBm</item>
+            </items>
+          </setting>
+          <setting command="DG">
+            <name>Duration of GAP Scan</name>
+            <description>Set the duration of the gap scan in seconds.</description>
+            <default_value>0x03</default_value>
+            <control_type>number</control_type>
+            <units>* 1 s</units>
+            <range_max>0x258</range_max>
+            <range_min>0x01</range_min>
+          </setting>
+          <setting command="WG">
+            <name>Windows of GAP Scan</name>
+            <description>Set the windows parameter for the gap scan in microseconds.</description>
+            <default_value>0x2BF2</default_value>
+            <control_type>number</control_type>
+            <units>* 1 us</units>
+            <range_max>0X270FD8F</range_max>
+            <range_min>0x9C4</range_min>
+          </setting>
+          <setting command="IG">
+            <name>Interval of GAP Scan</name>
+            <description>Set the interval parameter for the gap scan in microseconds.</description>
+            <default_value>0x138800</default_value>
+            <control_type>number</control_type>
+            <units>* 1 us</units>
+            <range_max>0X270FD8F</range_max>
+            <range_min>0x9C4</range_min>
+          </setting>
+          <setting command="FG">
+            <name>Filter of GAP Scan</name>
+            <description>The Filter ID parameter controls which advertisements are considered valid scan results.
+            After the filter ID is set the scan will only display advertisement that contain the text passed as the filter ID.
+            The filter only accepts ASCII characters. To reset the Filter ID the user needs to set 0x20 (an ASCII space character) as argument.</description>
+            <default_value>0x20</default_value>
+            <control_type>text</control_type>
+            <max_chars>22</max_chars>
+            <min_chars>1</min_chars>
+            <format>ASCII</format>
+            <exception></exception>
+          </setting>
+          <setting>
+            <name>Bluetooth Authentication</name>
+            <description>Configure Bluetooth authentication with a password or an SRP salt/verifier.</description>
+            <control_type>button</control_type>
+            <function_number>1</function_number>
+          </setting>
+        </settings>
+        <categories>
+          <category name="Bluetooth Authentication">
+            <description>Parameters for authenticating Bluetooth API access</description>
+            <visible>false</visible>
+            <settings>
+              <setting command="$S">
+                <name>SRP Salt</name>
+                <description>32-bit random value to make attempts to brute force passwords more difficult.</description>
+                <default_value>00000000</default_value>
+                <control_type>text</control_type>
+                <max_chars>8</max_chars>
+                <min_chars>1</min_chars>
+                <format>HEX</format>
+              </setting>
+              <setting command="$V">
+                <name>SRP Verifier (part 1)</name>
+                <description>Most significant 32 bytes of the 128 byte verifier</description>
+                <default_value>0000000000000000000000000000000000000000000000000000000000000000</default_value>
+                <control_type>text</control_type>
+                <max_chars>64</max_chars>
+                <min_chars>1</min_chars>
+                <format>HEX</format>
+              </setting>
+              <setting command="$W">
+                <name>SRP Verifier (part 2)</name>
+                <description>Second most significant 32 bytes of the 128 byte verifier</description>
+                <default_value>0000000000000000000000000000000000000000000000000000000000000000</default_value>
+                <control_type>text</control_type>
+                <max_chars>64</max_chars>
+                <min_chars>1</min_chars>
+                <format>HEX</format>
+              </setting>
+              <setting command="$X">
+                <name>SRP Verifier (part 3)</name>
+                <description>Third most significant 32 bytes of the 128 byte verifier</description>
+                <default_value>0000000000000000000000000000000000000000000000000000000000000000</default_value>
+                <control_type>text</control_type>
+                <max_chars>64</max_chars>
+                <min_chars>1</min_chars>
+                <format>HEX</format>
+              </setting>
+              <setting command="$Y">
+                <name>SRP Verifier (part 4)</name>
+                <description>Least significant 32 bytes of the 128 byte verifier</description>
+                <default_value>0000000000000000000000000000000000000000000000000000000000000000</default_value>
+                <control_type>text</control_type>
+                <max_chars>64</max_chars>
+                <min_chars>1</min_chars>
+                <format>HEX</format>
+              </setting>
+            </settings>
+          </category>
+        </categories>
+      </category>
+      <category name="MicroPython Options">
+        <description>Change MicroPython behavior</description>
+        <settings>
+          <setting command="PS">
+            <name>MicroPython Auto Start</name>
+            <description>Configure the module to automatically run compiled MicroPython bytecode stored in flash.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>Enabled</item>
+            </items>
+          </setting>
+        </settings>
+      </category>
+      <category name="Sleep Settings">
+        <description>Configure low power options</description>
+        <settings>
+          <setting command="SM">
+            <name>Sleep Mode</name>
+            <description>Set/read sleep mode. Pin sleep requires D8 and/or P7 to be set to 1 to invoke sleep.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>No Sleep</item>
+              <item>Pin Sleep</item>
+              <item>NA</item>
+              <item>NA</item>
+              <item>NA</item>
+              <item>NA</item>
+              <item>MicroPython Sleep</item>
+            </items>
+          </setting>
+        </settings>
+      </category>
+      <category name="API Configuration">
+        <description>Change API mode configuration</description>
+        <settings>
+          <setting command="AP">
+            <name>API Enable</name>
+            <description>The API mode setting. RF Packets received can be formatted into API frames to be sent out the serial port. When API is enabled the serial data must be formatted as API frames as transparent mode is disabled.</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>NA</item>
+              <item>API Mode Without Escapes</item>
+              <item>API Mode With Escapes</item>
+              <item>NA</item>
+              <item>MicroPython REPL</item>
+            </items>
+          </setting>
+          <setting command="AO">
+            <name>API Output Mode</name>
+            <description>The API data frame type output format for received API frames.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>API Rx Indicator - 0x90</item>
+              <item>API Explicit Rx Indicator - 0x91</item>
+            </items>
+          </setting>
+          <setting command="NP">
+            <name>Maximum Payload Length</name>
+            <description>The maximum number of payload bytes that can be sent in a Bluetooth transmission.</description>
+            <default_value>0xEC</default_value>
+            <control_type>none</control_type>
+          </setting>
+        </settings>
+      </category>
+      <category name="UART Interface">
+        <description>Configuration options for UART</description>
+        <settings>
+          <setting command="BD">
+            <name>UART Baud Rate</name>
+            <description>The serial interface baud rate for communication between the serial port of the module and the host. Request non-standard baud rates with values between 0x4B0 and 0xEC400 inclusive. Then read the BD parameter to find actual baud rate achieved.</description>
+            <default_value>0x3</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>1200</item>
+              <item>2400</item>
+              <item>4800</item>
+              <item>9600</item>
+              <item>19200</item>
+              <item>38400</item>
+              <item>57600</item>
+              <item>115200</item>
+              <item>230400</item>
+              <item>460800</item>
+              <item>921600</item>
+            </items>
+          </setting>
+          <setting command="NB">
+            <name>UART Parity</name>
+            <description>The parity for the UART.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>No Parity</item>
+              <item>Even Parity</item>
+              <item>Odd Parity</item>
+            </items>
+          </setting>
+          <setting command="SB">
+            <name>UART Stop Bits</name>
+            <description>Configure the number of stop bits that the UART will output.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>One stop bit</item>
+              <item>Two stop bits</item>
+            </items>
+          </setting>
+          <setting command="FT">
+            <name>Flow Control Threshold</name>
+            <description>The flow control threshold. De-assert CTS when FT bytes are in the UART receive buffer.</description>
+            <default_value>0x2BB</default_value>
+            <control_type>number</control_type>
+            <range_max>0x36E</range_max>
+            <range_min>0x42</range_min>
+            <units>Bytes</units>
+          </setting>
+        </settings>
+      </category>
+      <category name="AT Command Options">
+        <description>Change AT Command Mode Behavior. Command mode is only accessible via the UART.</description>
+        <settings>
+          <setting command="CC">
+            <name>Command Sequence Character</name>
+            <description>The character value used to enter command mode. The default value (0x2B) is the ASCII code for the plus ('+') character. It must be entered three times within the guard time to enter command mode.</description>
+            <default_value>0x2B</default_value>
+            <control_type>number</control_type>
+            <range_max>0xFF</range_max>
+            <range_min>0x0</range_min>
+            <units>Recommended: 0x20-0x7F (ASCII)</units>
+          </setting>
+          <setting command="CT">
+            <name>Command Mode Timeout</name>
+            <description>The command mode timeout parameter. If no valid commands have been received within this time period, module returns to Idle Mode from AT Command Mode.</description>
+            <default_value>0x64</default_value>
+            <control_type>number</control_type>
+            <range_max>0x1770</range_max>
+            <range_min>0x2</range_min>
+            <units>x 100 ms</units>
+          </setting>
+          <setting command="GT">
+            <name>Guard Times</name>
+            <description>The required period of silence before, after, and between the Command Mode Characters of the Command Mode Sequence (GT + CC + GT). The period of silence is used to prevent inadvertent entrance into AT Command Mode.</description>
+            <default_value>0x3E8</default_value>
+            <control_type>number</control_type>
+            <range_max>0x6D3</range_max>
+            <range_min>0x2</range_min>
+            <units>x 1 ms</units>
+          </setting>
+        </settings>
+      </category>
+      <category name="UART Pin Configuration">
+        <description>Pin configuration for the UART interface</description>
+        <settings>
+          <setting command="D6">
+            <name>DIO6/RTS Configuration</name>
+            <description>Configure options for the DIO6/RTS line of the module.
+TH pin 16
+Options include:
+RTS flow control
+Digital input
+Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>RTS flow control</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D7">
+            <name>DIO7/CTS Configuration</name>
+            <description>Configure options for the DIO7/CTS line of the module.
+TH pin 12
+Options include:
+CTS flow control
+Digital input
+Digital output
+RS-485 control</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>CTS flow control</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+              <item>RS-485 Enable, Low</item>
+              <item>RS-485 Enable, High</item>
+            </items>
+          </setting>
+          <setting command="P3">
+            <name>DIO13/UART_DOUT Configuration</name>
+            <description>Configure options for the DIO13 line of the module.
+TH pin 2
+Options include:
+UART DOUT
+Digital input
+Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>UART_DOUT</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="P4">
+            <name>DIO14/UART_DIN Configuration</name>
+            <description>Configure options for the DIO14/UART_DIN line of the module.
+TH pin 3
+Options include:
+UART DIN
+Digital input
+Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>UART_DIN</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+        </settings>
+      </category>
+      <category name="I/O Settings">
+        <description>Modify DIO and ADC options</description>
+        <settings>
+          <setting command="D0">
+            <name>DIO0/AD0/Commissioning Button Configuration</name>
+            <description>Configure options for the AD0/DIO0/Commissioning line of the module.
+TH Pin 20
+Options include:
+    Commissioning button
+    ADC input
+    Digital input
+    Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>Commissioning Button</item>
+              <item>ADC</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D1">
+            <name>DIO1/AD1/SPI_nATTN Configuration</name>
+            <description>Configure options for the AD1/DIO1/SPI_nATTN line of the module.
+TH pin 19
+Options include:
+    SPI_nATTN on TH variant
+    ADC input
+    Digital input
+    Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>SPI_nATTN</item>
+              <item>ADC</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+              <item>I2C SCL</item>
+            </items>
+          </setting>
+          <setting command="D2">
+            <name>DIO2/AD2/SPI_CLK Configuration</name>
+            <description>Configure options for the AD2/DIO2/SPI_CLK line of the module.
+TH pin 18
+Options include:
+    SPI_CLK on TH variant
+    ADC input
+    Digital input
+    Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>SPI_SCLK</item>
+              <item>ADC</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D3">
+            <name>DIO3/AD3/SPI_nSSEL Configuration</name>
+            <description>Configure options for the AD3/DIO3 line of the module.
+TH pin 17
+Options include:
+    SPI_nSSEL on TH variant
+    ADC input
+    Digital input
+    Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>SPI_nSSEL</item>
+              <item>ADC</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D4">
+            <name>DIO4/SPI_MOSI Configuration</name>
+            <description>Configure options for the DIO4/SPI_MOSI line of the module.
+TH pin 11
+Options include:
+    SPI_MOSI on TH variant
+    Digital input
+    Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>SPI_MOSI</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D5">
+            <name>DIO5/Association LED Configuration</name>
+            <description>Configure options for the DIO5/Assoc line of the module.
+TH pin 15
+Options include:
+    Associated LED indicator (blinks when associated)
+    Digital input
+    Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>Associated indicator</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D8">
+            <name>DIO8/DTR/Sleep_Rq Configuration</name>
+            <description>Configure options for the DIO8 line of the module.
+TH pin 9
+Options include:
+    Sleep Request/DTR (used with pin hibernate and pin wake)
+    Digital input
+    Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>DTR/Sleep_Rq</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="D9">
+            <name>DIO9/Sleep Indicator Configuration</name>
+            <description>Configure options for the DIO9 line of the module.
+TH pin 13
+Options include:
+    Awake/nSleep indicator (pin is LOW when module is asleep)
+    Digital input
+    Digital output</description>
+            <default_value>0x1</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>Awake/Asleep indicator</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+            </items>
+          </setting>
+          <setting command="P2">
+            <name>DIO12/SPI_MISO Configuration</name>
+            <description>Configure options for the DIO12/SPI_MISO line of the module.
+TH pin 4
+Options include:
+    SPI_MISO on TH variant
+    Digital input
+    Digital output</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>Disabled</item>
+              <item>SPI_MISO</item>
+              <item>NA</item>
+              <item>Digital Input</item>
+              <item>Digital Out, Low</item>
+              <item>Digital Out, High</item>
+              <item>I2C SDA</item>
+            </items>
+          </setting>
+          <setting command="PR">
+            <name>Pull-up Resistor Enable</name>
+            <description>Set/read bitfield to configure internal pullup resistors status for I/O lines. 1=internal pullup enabled, 0=no internal pullup.
+Bitfield options:
+    Bit 0  - DIO4  | TH Pin 11
+    Bit 1  - DIO3  | TH Pin 17
+    Bit 2  - DIO2  | TH Pin 18
+    Bit 3  - DIO1  | TH Pin 19
+    Bit 4  - DIO0  | TH Pin 20
+    Bit 5  - DIO6  | TH Pin 16
+    Bit 6  - DIO8  | TH Pin 9
+    Bit 7  - DIO14 | TH Pin 3
+    Bit 8  - DIO5  | TH Pin 15
+    Bit 9  - DIO9  | TH Pin 13
+    Bit 10 - DIO12 | TH Pin 4
+    Bit 11 - DIO10 | TH Pin 6
+    Bit 12 - DIO11 | TH Pin 7
+    Bit 13 - DIO7  | TH Pin 12
+    Bit 14 - DIO13 | TH Pin 2</description>
+    <range_max>0xFFFF</range_max>
+            <control_type>number</control_type>
+            <range_min>0x0</range_min>
+            <default_value>0xE7FF</default_value>
+            <units>Bitfield</units>
+          </setting>
+          <setting command="PD">
+            <name>Pull-up/down Direction</name>
+            <description>Set/read bitfield for resistor direction (1=pullup, 0=pull-down) for corresponding I/O lines that are set in PR command.</description>
+            <default_value>0xE7FF</default_value>
+            <control_type>number</control_type>
+            <range_max>0xFFFF</range_max>
+            <range_min>0x0</range_min>
+            <units>Bitfield</units>
+          </setting>
+          <setting command="LT">
+            <name>Associate LED Blink Time</name>
+            <description>The Associate LED blink rate. This value determines the blink rate of the Associate/DIO5 pin. Setting LT to 0 will use the default blink time (250ms).</description>
+            <default_value>0x0</default_value>
+            <control_type>number</control_type>
+            <range_max>0xFF</range_max>
+            <range_min>0x14</range_min>
+            <additional_values>
+              <value>0</value>
+            </additional_values>
+            <units>x 10 ms</units>
+          </setting>
+          <setting command="AV">
+            <name>Analog Voltage Reference</name>
+            <description>The analog voltage reference used for A/D sampling.</description>
+            <default_value>0x0</default_value>
+            <control_type>combo</control_type>
+            <items>
+              <item>1.21v reference</item>
+              <item>2.42v reference</item>
+              <item>VDD reference</item>
+              </items>
+          </setting>
+        </settings>
+      </category>
+      <category name="Location">
+        <description>User-defined parameters used to store the physical location of the deployed device.</description>
+        <settings>
+          <setting command="LX">
+          <name>Location X - Latitude</name>
+          <description>User-defined GPS latitude coordinates of the node that is displayed on Digi Remote Manager and Network Assistant.</description>
+          <default_value> </default_value>
+          <control_type>text</control_type>
+          <max_chars>15</max_chars>
+          <min_chars>1</min_chars>
+          <format>ASCII</format>
+          <exception></exception>
+        </setting>
+        <setting command="LY">
+          <name>Location Y - Longitude</name>
+          <description>User-defined GPS longitude coordinates of the node that is displayed on Digi Remote Manager and Network Assistant.</description>
+          <default_value> </default_value>
+          <control_type>text</control_type>
+          <max_chars>15</max_chars>
+          <min_chars>1</min_chars>
+          <format>ASCII</format>
+          <exception></exception>
+        </setting>
+        <setting command="LZ">
+          <name>Location Z - Elevation</name>
+          <description>User-defined GPS elevation of the node that is displayed on Digi Remote Manager and Network Assistant.</description>
+          <default_value> </default_value>
+          <control_type>text</control_type>
+          <max_chars>15</max_chars>
+          <min_chars>1</min_chars>
+          <format>ASCII</format>
+          <exception></exception>
+        </setting>
+        </settings>
+      </category>
+      <category name="Diagnostics - Firmware/Hardware Information">
+        <description>Information about the XBee hardware and firmware</description>
+        <settings>
+          <setting command="NI">
+            <name>Node Identifier</name>
+            <description>A human-friendly node identifier string for this module. This can be up to 20 ASCII characters.
+  This value is returned in a ND query and can be used to easily identify modules.</description>
+            <default_value>0x20</default_value>
+            <control_type>text</control_type>
+            <max_chars>20</max_chars>
+            <min_chars>1</min_chars>
+            <format>ASCII</format>
+            <exception></exception>
+          </setting>
+          <setting command="DD">
+            <name>Device Type Identifier</name>
+            <description>The Digi device type identifier value. Can be optionally included in network discoveries and is used to differentiate multiple XBee-based products.</description>
+            <default_value>0x1A0000</default_value>
+            <control_type>number</control_type>
+            <range_max>0xFFFFFFFF</range_max>
+            <range_min>0x0</range_min>
+          </setting>
+          <setting command="SH">
+            <name>Serial Number High</name>
+            <description>The upper 32 bits of the unique IEEE 64-bit Address assigned to this module</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="SL">
+            <name>Serial Number Low</name>
+            <description>The lower 32 bits of the unique IEEE 64-bit Address assigned to this module</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="VR">
+            <name>Firmware Version</name>
+            <description>The module firmware version number.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="VH">
+            <name>Bootloader Version</name>
+            <description>Display the Bootloader version</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="HV">
+            <name>Hardware Version</name>
+            <description>The module hardware version number.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="%C">
+            <name>Hardware/Firmware Compatability</name>
+            <description>Specifies what firmware is compatabile with this radio. Firmware with a compatibility value lower than the value returned by %C cannot be loaded onto the board.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="%V">
+            <name>Supply Voltage</name>
+            <description>Read the supply voltage of the module in mV units.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="TP">
+            <name>Temperature</name>
+            <description>Read power compensation temperature sensor in units of Celsius degrees.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="CK">
+            <name>Configuration Checksum</name>
+            <description>The CRC of the current settings. The purpose of this command is to allow the detection of an unexpected configuration change on a device. After a firmware update this command may return a different value.</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+          <setting command="D%">
+            <name>Manufacturing Date</name>
+            <description>Date of Manufacture. DDDDDDHH000FFFFF, where DDDDDD represents the manufacturing date as the number of days since 1/1/1900: 1/1/2000=0x008EAC, etc. HH represents the hour based on a 24-hour clock. 000 is three empty hex digits that could be used later on if needed. FFFFF represents the test fixture serial number as a decimal</description>
+            <default_value>0x</default_value>
+            <control_type>none</control_type>
+          </setting>
+        </settings>
+      </category>
+    </categories>
+  </firmware>
+</firmwares>
