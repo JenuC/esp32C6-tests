@@ -1,0 +1,229 @@
+
+Scanning Channel Dec: 21 (Hex: 0x15)...
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 46 01 0B 00 00 01 00 83 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B3 01 0B 00 00 03 00 B7 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 88 01 0B 00 00 02 00 52 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 88 C4 FC 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 47 01 0B 00 00 01 00 84 00 0B C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 89 01 0B 00 00 02 00 53 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B4 01 0B 00 00 03 00 B8 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 B4 BF 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 89 01 0B 00 00 02 00 53 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 48 01 0B 00 00 01 00 85 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 48 C1 06 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8A 01 0B 00 00 02 00 54 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 8A C5 06 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 49 01 0B 00 00 01 00 86 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B5 01 0B 00 00 03 00 B9 00 1E CD 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 B5 BF 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8B 01 0B 00 00 02 00 55 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B6 01 0B 00 00 03 00 BA 00 1E CD 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4A 01 0B 00 00 01 00 87 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8C 01 0B 00 00 02 00 56 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4B 01 0B 00 00 01 00 88 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 4B C0 01 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8D 01 0B 00 00 02 00 57 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B7 01 0B 00 00 03 00 BB 00 1E CE 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4C 01 0B 00 00 01 00 89 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8E 01 0B 00 00 02 00 58 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4D 01 0B 00 00 01 00 8A 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8F 01 0B 00 00 02 00 59 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 8F 01 0B 00 00 02 00 59 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B8 01 0B 00 00 03 00 BC 00 1E CE 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 B8 BB 00 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4E 01 0B 00 00 01 00 8B 00 0B C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 90 01 0B 00 00 02 00 5A 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 4F 01 0B 00 00 01 00 8C 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 91 01 0B 00 00 02 00 5B 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 91 C1 07 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 B9 01 0B 00 00 03 00 BD 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 B9 C3 07 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 50 01 0B 00 00 01 00 8D 00 0B C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 92 01 0B 00 00 02 00 5C 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 92 BC 07 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 51 01 0B 00 00 01 00 8E 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BA 01 0B 00 00 03 00 BE 00 1E CD 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 BA C0 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 93 01 0B 00 00 02 00 5D 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 93 C0 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 52 01 0B 00 00 01 00 8F 00 0B C1 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 94 01 0B 00 00 02 00 5E 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BB 01 0B 00 00 03 00 BF 00 1E CE 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 BB C2 05 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 53 01 0B 00 00 01 00 90 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 95 01 0B 00 00 02 00 5F 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 95 BD 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BC 01 0B 00 00 03 00 C0 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 54 01 0B 00 00 01 00 91 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 54 BF 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 96 01 0B 00 00 02 00 60 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BD 01 0B 00 00 03 00 C1 00 1E CE 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 97 01 0B 00 00 02 00 61 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 97 BF 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 55 01 0B 00 00 01 00 92 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 55 BA 05 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 98 01 0B 00 00 02 00 62 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BE 01 0B 00 00 03 00 C2 00 1E CD 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 56 01 0B 00 00 01 00 93 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 99 01 0B 00 00 02 00 63 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 57 01 0B 00 00 01 00 94 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9A 01 0B 00 00 02 00 64 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 58 01 0B 00 00 01 00 95 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BF 01 0B 00 00 03 00 C3 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 58 01 0B 00 00 01 00 95 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 58 BD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 BF 01 0B 00 00 03 00 C3 00 1E CD 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9B 01 0B 00 00 02 00 65 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 59 01 0B 00 00 01 00 96 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9C 01 0B 00 00 02 00 66 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C0 01 0B 00 00 03 00 C4 00 1E CE 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 C0 C1 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5A 01 0B 00 00 01 00 97 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9D 01 0B 00 00 02 00 67 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5B 01 0B 00 00 01 00 98 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9E 01 0B 00 00 02 00 68 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 9E C4 04 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C1 01 0B 00 00 03 00 C5 00 1E CE 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 C1 C1 07 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5C 01 0B 00 00 01 00 99 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 9F 01 0B 00 00 02 00 69 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 9F C2 05 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5D 01 0B 00 00 01 00 9A 00 0B C1 0B 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C2 01 0B 00 00 03 00 C6 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 C2 C1 07 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 A0 01 0B 00 00 02 00 6A 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 A0 C1 04 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 A0 C0 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5E 01 0B 00 00 01 00 9B 00 0B C1 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 5E BF 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C3 01 0B 00 00 03 00 C7 00 1E CD 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 5F 01 0B 00 00 01 00 9C 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 5F BE 05 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 A1 01 0B 00 00 02 00 6B 00 14 C2 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 A1 C0 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C4 01 0B 00 00 03 00 C8 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 C4 C1 FF 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 60 01 0B 00 00 01 00 9D 00 0B C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 A2 01 0B 00 00 02 00 6C 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 A2 C0 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C5 01 0B 00 00 03 00 C9 00 1E CD 08 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 61 01 0B 00 00 01 00 9E 00 0B C1 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 A3 01 0B 00 00 02 00 6D 00 14 C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C6 01 0B 00 00 03 00 CA 00 1E CD 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 62 01 0B 00 00 01 00 9F 00 0B C2 0A 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 14 bytes | Hex: 61 88 C7 01 0B 00 00 03 00 CB 00 1E CE 09 
+
+*** DETECTED TRAFFIC on Channel 21 *** Length: 5 bytes | Hex: 02 00 C7 C5 06 
+Scanning Channel Dec: 22 (Hex: 0x16)...
