@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 8: The two bytes that are not a CRC — ESP32-C6 &amp; 802.15.4</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 8</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 8</span>
+<h1>The two bytes that are not a CRC</h1>
+
+<p class="lede">The spec says every frame ends with a two-byte checksum, and
+<code>frame[0]</code> counts it. That is true on the air and false in the
+receive buffer. This chapter proves it from live traffic rather than asking you
+to believe it.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch08_rssi_lqi/ch08_rssi_lqi.ino">sketches/ch08_rssi_lqi/ch08_rssi_lqi.ino</a></span>
+</div>
+
+<h2>The wrong model</h2>
+
+<p>The obvious reading of a 14-byte PSDU is 12 bytes of MAC frame plus a 2-byte
+Frame Check Sequence. Most people write their parser that way, treat the last
+two bytes as a checksum they do not need, and move on.</p>
+
+<p>The hardware has already verified the CRC before your callback runs — that
+is what "receive done" means — and it reuses those two bytes to report its own
+measurements: <strong>RSSI</strong>, then a <strong>link-quality</strong> value.</p>
+
+<h2>The experiment</h2>
+
+<p>Do not take that on faith. The sketch proves it on-device.</p>
+
+<p>The argument is simple enough to state in one line: <em>a CRC is a function
+of the frame content, so identical content cannot produce two different
+checksums.</em> One counterexample settles it. So the sketch remembers the
+leading bytes of every frame it sees, and watches for the same body arriving
+with different trailing bytes.</p>
+
+<p>Repeats are common, which is what makes this practical. 802.15.4 retransmits
+when an ACK is lost, so the same bytes genuinely go out twice. Point it at a
+busy channel and you normally get a hit within a minute:</p>
+
+<pre><code>  **** PROOF: identical frame body, different trailing bytes ****
+  body: 61 88 69 01 0B 00 00 02 00 B6 00 14
+    trailer BA 06   -> rssi -70 dBm, lqi 6
+    trailer BB 09   -> rssi -69 dBm, lqi 9
+  A CRC is a function of the frame content, so one body
+  cannot have two checksums. These are receiver metadata.</code></pre>
+
+<p>Across the 12,800 captured frames in this repository, <strong>315 distinct
+frame bodies</strong> appear with more than one trailing pair, one of them with
+five.</p>
+
+<h2>Confirming what they are</h2>
+
+<p>Reading the first trailing byte as a signed 8-bit integer gives numbers that
+are unmistakably dBm, and they track physical distance exactly as they should.
+From the captures, grouped by channel:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Channel</th><th>Frames</th><th>Mean</th><th>Range</th><th>Where that transmitter was</th></tr></thead>
+<tbody>
+<tr><td>21</td><td>3,026</td><td>−62.2 dBm</td><td>−76 … −49</td><td>same room as the sniffer</td></tr>
+<tr><td>25</td><td>895</td><td>−75.4 dBm</td><td>−95 … −67</td><td>nearby</td></tr>
+<tr><td>18</td><td>544</td><td>−88.4 dBm</td><td>−97 … −83</td><td>down the corridor</td></tr>
+<tr><td>16</td><td>847</td><td>−90.2 dBm</td><td>−99 … −84</td><td>further</td></tr>
+<tr><td>14</td><td>397</td><td>−94.7 dBm</td><td>−106 … −86</td><td>two doors away</td></tr>
+<tr><td>17</td><td>717</td><td>−95.1 dBm</td><td>−108 … −86</td><td>furthest</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A 30&nbsp;dB spread that lines up with the floor plan is not what a checksum
+looks like. The second byte stays in a narrow range (1–11 in these captures) and
+behaves like a quality or correlation count.</p>
+
+<h2>What to actually do</h2>
+
+<p>Read them from <code>frame_info</code>. It has been the callback's second
+argument since chapter 3:</p>
+
+<pre><code>queue[q_head].rssi = frame_info ? frame_info->rssi : 0;
+queue[q_head].lqi  = frame_info ? frame_info->lqi  : 0;</code></pre>
+
+<p>This is the documented route to the same numbers, and it does not depend on a
+buffer-layout detail that could change. The sketch prints both readings side by
+side so you can see they agree:</p>
+
+<pre><code>len 14  frame_info: rssi  -63 dBm lqi  11   tail bytes: C1 0B  ( -63 dBm,  11)</code></pre>
+
+<div class="warn">
+  <span class="label">The consequence that matters</span>
+  <p>Your payload is <code>frame[0] - 2</code> bytes long, not
+  <code>frame[0]</code>. Getting this wrong by two bytes is how a protocol with
+  a 3-byte payload appears to have a 5-byte one, with two trailing fields that
+  never quite make sense and change for no reason you can find. That mistake can
+  burn a lot of time in chapter 10.</p>
+</div>
+
+<h2>Transmit is not symmetric</h2>
+
+<p>On the way out, the FCS is real. <code>esp_ieee802154_transmit()</code>
+appends a genuine CRC over your frame, and you must leave room for it in
+<code>buf[0]</code> without writing it yourself. The asymmetry is only on the
+receive side, and chapter 9 depends on it.</p>
+
+<div class="ok">
+  <span class="label">A transferable habit</span>
+  <p>The spec described the protocol correctly; it said nothing about what a
+  particular receiver leaves in memory afterwards. When a document and your
+  bytes disagree, the bytes are describing your actual system. Find the test
+  that distinguishes the two readings — here, grouping frames by content — and
+  run it.</p>
+</div>
+
+<div class="pager">
+  <span>&larr; <a href="ch07.html">Chapter 7: Reading the header</a></span>
+  <span><a href="ch09.html">Chapter 9: Transmitting</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

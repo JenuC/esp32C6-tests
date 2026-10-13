@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 10: Decoding an unknown payload — ESP32-C6 &amp; 802.15.4</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 10</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 10</span>
+<h1>Decoding an unknown payload</h1>
+
+<p class="lede">Everything so far reads parts of a frame that a standard
+defines. This chapter is about the part nobody wrote down — and the case study
+is real, with the captures in this repository so you can check the work.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch10_decode_case/ch10_decode_case.ino">sketches/ch10_decode_case/ch10_decode_case.ino</a></span>
+</div>
+
+<p>The subject: Digi XB24 radios wired to laser-safety monitors in a building,
+beaconing status to an indicator box about once a second. Around 12,800 captured
+frames. After chapter 7 the frame splits cleanly and only one part is a
+mystery:</p>
+
+<div class="frame">
+  <div class="f-hdr">61 88 46 01 0B 00 00 01 00<span>MAC header — known</span></div>
+  <div class="f-pay">83 00 0B<span>payload — ?</span></div>
+  <div class="f-meta">C1 0B<span>rssi / lqi</span></div>
+</div>
+
+<p>Three bytes. Here is how they fell.</p>
+
+<h2>Step 1 — Count before you read</h2>
+
+<p>Before interpreting a single byte, find the fields that never change.
+Constants are structure; variables are content. Grouping by length and by source
+address:</p>
+
+<ul>
+<li>Only two frame lengths existed, 14 and 5, in near-equal numbers. Equal
+  counts of two sizes is the signature of acknowledged unicast, so the 5-byte
+  frames were ACKs and there was really only one format to crack.</li>
+<li>The destination was <code>0x0000</code> in all 6,426 data frames.</li>
+<li>The middle payload byte was <code>0x00</code> in all 6,426.</li>
+<li>Exactly three source addresses existed: <code>0x0001</code>,
+  <code>0x0002</code>, <code>0x0003</code>.</li>
+</ul>
+
+<p>That is most of the structure, and none of it required a guess. Two unknown
+bytes remain.</p>
+
+<h2>Step 2 — Change the world and capture again</h2>
+
+<p>This is the step that actually decodes a protocol, and it beats any amount of
+passive staring. Three captures under known physical conditions, tabulating the
+last payload byte by source:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Capture</th><th>src 0x0001</th><th>src 0x0002</th><th>src 0x0003</th></tr></thead>
+<tbody>
+<tr><td>monitors off</td><td><code>0A</code> (10)</td><td><code>14</code> (20)</td><td><code>1E</code> (30)</td></tr>
+<tr><td>monitors on, laser off</td><td><code>0A</code> (10)</td><td><code>14</code> (20)</td><td><code>1E</code> (30)</td></tr>
+<tr><td>monitors on, <strong>laser on</strong></td><td><strong><code>0B</code> (11)</strong></td><td><code>14</code> (20)</td><td><code>1E</code> (30)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One byte moved, on one device, in the one capture where that device's laser
+was on:</p>
+
+<pre><code>payload[2] = source_address × 10 + (laser_on ? 1 : 0)</code></pre>
+
+<p>So 10/11 for monitor 1, 20/21 for monitor 2, 30/31 for monitor 3. The values
+read as decimal in hex — <code>0x0A</code> is 10, <code>0x14</code> is 20 —
+which is a tell that a person chose them rather than a bit-packing scheme.</p>
+
+<p>Twelve thousand passive frames could not have produced that table. One
+capture with a known change did it in a single pass.</p>
+
+<h2>Step 3 — What is left over is usually a counter</h2>
+
+<p>The first payload byte changed every frame. Comparing consecutive frames from
+the same source:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Channel / source</th><th>Frames</th><th>Both advanced by 1</th><th>Advanced together</th></tr></thead>
+<tbody>
+<tr><td>ch 16 src 1</td><td>823</td><td>704</td><td>96.0%</td></tr>
+<tr><td>ch 21 src 1</td><td>547</td><td>496</td><td>96.3%</td></tr>
+<tr><td>ch 21 src 2</td><td>1,598</td><td>839</td><td>96.4%</td></tr>
+<tr><td>ch 25 src 1</td><td>862</td><td>810</td><td>96.2%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>It advances in step with the MAC sequence number about 95% of the time, from
+a different starting value, with the offset slipping by one every few hundred
+frames. That is a second counter maintained one layer above the MAC — Digi's
+own — not anything derived from the sequence number.</p>
+
+<p>Because the offset drifts it cannot be computed, so a re-implementation just
+keeps its own counter. Which is what the real radios are doing.</p>
+
+<p>The remaining 5% were exact duplicate frames: MAC retransmissions after a
+lost ACK. Those same duplicates are what proved the RSSI point in chapter 8 —
+one observation, two uses.</p>
+
+<h2>Doing this to your own device</h2>
+
+<p>The sketch runs the method as well as the result. It prints the decoded
+protocol in English:</p>
+
+<pre><code>monitor 1: laser ON    (pan 0x0B01 src 0x0001 seq 0x46 rssi -63 dBm)
+monitor 2: laser off   (pan 0x0B01 src 0x0002 seq 0x88 rssi -62 dBm)</code></pre>
+
+<p>and every fifteen seconds it prints the tool from step 1 and 2 — a tally, per
+source, of every value each payload byte has ever taken:</p>
+
+<pre><code>================ payload profile ================
+  src 0x0001  412 frames, 3-byte payload
+    payload[0]: varies (>8 distinct values) - likely a counter
+    payload[1]: constant 0x00
+    payload[2]: 0x0A(10) 0x0B(11)   &lt;-- state?
+  src 0x0002  389 frames, 3-byte payload
+    payload[0]: varies (>8 distinct values) - likely a counter
+    payload[1]: constant 0x00
+    payload[2]: constant 0x14
+=================================================</code></pre>
+
+<p>Point it at something of your own, let it settle, then change something
+physical — press a button, open a door, switch a light — and watch which column
+moves. That is the entire technique.</p>
+
+<h2>Lock the result in with a test</h2>
+
+<p>A decode that lives only in a sketch rots. Copy two frames verbatim out of
+the capture, write the builder, and assert it reproduces them byte for byte.
+<code>laser_xbee_esp/test/test_frame.c</code> in this repository does exactly
+that, and runs on a laptop with no hardware:</p>
+
+<pre><code>gcc -Imain test/test_frame.c main/xbee_frame.c -o t &amp;&amp; ./t</code></pre>
+
+<p>The on-air confirmation is the one that counts, though. Transmit your
+reconstructed frame at the real device and see whether it acknowledges. An ACK
+means its MAC accepted every field in your header — which is
+<a href="ch09.html">chapter 9</a>, and is how this project ended up replacing an
+XBee with an ESP32-C6.</p>
+
+<div class="warn">
+  <span class="label">Write down what you guessed</span>
+  <p>Monitors 2 and 3 never showed their "laser on" codes (21, 31) in any
+  capture. Those are inferred from the pattern, not observed. Keeping the
+  observed and the inferred parts of a decode separate is worth the small effort
+  — the inferences are where the next bug will be.</p>
+</div>
+
+<h2>The method, in short</h2>
+
+<ol>
+<li><strong>Count before you read.</strong> Constants are structure, variables
+  are content. This is free and it narrows the problem enormously.</li>
+<li><strong>Change the world and capture again.</strong> One A/B capture under
+  known conditions is worth any amount of passive data.</li>
+<li><strong>Apply the standard first.</strong> Everything down to the payload
+  boundary is already defined. Guessing offsets without reading the FCF wastes
+  time.</li>
+<li><strong>Test your assumptions against the bytes.</strong> Chapter 8's CRC
+  question looked settled by the spec, and one grouping disproved it.</li>
+<li><strong>Make the conclusion executable.</strong> A replay test against
+  captured frames stops a later refactor from quietly breaking the format.</li>
+</ol>
+
+<h2>Where to go next</h2>
+
+<p>The two appendices have the full detail behind this chapter:
+<a href="https://github.com/JenuC/esp32c6-tests/blob/main/docs/discussion.md">discussion.md</a> on how the original listener sketches
+work, and <a href="https://github.com/JenuC/esp32c6-tests/blob/main/docs/decoding.md">decoding.md</a> with the complete evidence
+tables. The raw captures are in
+<code>esp32-c6-listener/esp-listener-output/</code>, and
+<code>laser_xbee_esp/</code> is the ESP-IDF project that came out of all
+this — an ESP32-C6 that replaces the original XBee entirely.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch09.html">Chapter 9: Transmitting</a></span>
+  <span><a href="index.html">Contents</a></span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

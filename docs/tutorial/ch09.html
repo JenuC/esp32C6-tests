@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 9: Transmitting, and getting acknowledged — ESP32-C6 &amp; 802.15.4</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 9</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 9</span>
+<h1>Transmitting, and getting acknowledged</h1>
+
+<p class="lede">Receiving is forgiving — a frame you fail to parse is a frame
+you ignore. Transmitting is not. Get one header field wrong and the receiver's
+hardware filter drops your frame before any software sees it, and you get no
+error at all. Just silence.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch09_transmit/ch09_transmit.ino">sketches/ch09_transmit/ch09_transmit.ino</a></span>
+</div>
+
+<h2>The ACK is the whole point</h2>
+
+<p>Because failure is silent, you need one honest signal that the other end
+accepted your frame. That signal is the acknowledgment.</p>
+
+<p>The receiving MAC sends it automatically, in hardware, and only if your frame
+passed CRC <em>and</em> passed its address filter. So an ACK is not a courtesy —
+it is proof that every field in your header was right. One bit of feedback tests
+the lot.</p>
+
+<h2>Two ways transmit differs from receive</h2>
+
+<h3>The length byte includes an FCS you do not write</h3>
+
+<p><code>buf[0]</code> is the PSDU length including the two-byte FCS, and the
+hardware appends a real CRC. So for 12 bytes of header and payload you set
+<code>buf[0] = 14</code> and write 12 bytes:</p>
+
+<pre><code>buf[0] = (uint8_t)((p - (buf + 1)) + 2);   // +2 for the FCS</code></pre>
+
+<p>Writing the payload length there instead of the PSDU length is the classic
+off-by-two in this API, and it produces a frame nobody answers.</p>
+
+<h3>Promiscuous mode must be off</h3>
+
+<p>Promiscuous disables address filtering <em>and</em> automatic ACKs. A
+promiscuous node never replies to anyone and is never replied to. A sniffer and
+a participant are different roles, so this sketch configures itself as a real
+member of the PAN:</p>
+
+<pre><code>esp_ieee802154_set_channel(CHANNEL);
+esp_ieee802154_set_panid(PAN_ID);
+esp_ieee802154_set_short_address(MY_ADDR);
+esp_ieee802154_set_promiscuous(false);
+esp_ieee802154_set_rx_when_idle(true);   // required, to hear the ACK
+esp_ieee802154_receive();</code></pre>
+
+<p>Those are the calls chapters 3–8 could ignore. The <code>rx_when_idle</code>
+line is not optional here: the ACK arrives well under a millisecond after your
+frame goes out, and the radio has to be back in receive by then.</p>
+
+<h2>Building the frame</h2>
+
+<p>Chapter 7 in reverse, little-endian throughout:</p>
+
+<pre><code>p = put16(p, 0x8861);     // Data, ACK req, PAN compressed, short/short
+*p++ = sequence;
+p = put16(p, PAN_ID);     // destination PAN
+p = put16(p, DEST_ADDR);  // destination short address
+p = put16(p, MY_ADDR);    // source short address, no source PAN
+memcpy(p, payload, plen);</code></pre>
+
+<p>The source PAN is omitted because the compression bit in the FCF says it is.
+Set that bit and then write the field anyway and everything downstream shifts by
+two bytes.</p>
+
+<h2>Sending</h2>
+
+<pre><code>esp_err_t err = esp_ieee802154_transmit(frame, true);</code></pre>
+
+<p>The second argument is CCA — clear channel assessment. With
+<code>true</code> the radio listens first and backs off if the channel is busy,
+which is the polite behaviour and the right default on a shared band.
+<code>false</code> transmits immediately regardless.</p>
+
+<p>A non-<code>ESP_OK</code> return is a local rejection: the frame never
+reached the air. Everything else is reported asynchronously through two
+callbacks you define by name, exactly like the receive one.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Callback</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>esp_ieee802154_transmit_done</code> with <code>ack != NULL</code></td>
+    <td>It arrived and the other end accepted it. This is the result you want.</td></tr>
+<tr><td><code>esp_ieee802154_transmit_done</code> with <code>ack == NULL</code></td>
+    <td>It went out and nothing answered. Nobody at that address, or they did
+        not hear you.</td></tr>
+<tr><td><code>esp_ieee802154_transmit_failed</code></td>
+    <td>The radio gave up. Usually CCA failure (channel busy every attempt) or
+        an ACK timeout after its retries.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="warn">
+  <span class="label">The ACK is a receive buffer too</span>
+  <p>The acknowledgment arrives in one of the same pool of buffers from
+  chapter 4, so it has to be returned:</p>
+  <pre><code>esp_ieee802154_receive_handle_done((uint8_t *)ack);</code></pre>
+  <p>Leak these and you hit the twenty-frame wall again — just more slowly, and
+  in a transmit path where you are not looking for it.</p>
+</div>
+
+<h2>Debugging a frame nobody accepts</h2>
+
+<p>The useful move is to sniff your own transmission. Put chapter 7 on a second
+C6 on the same channel, and the question splits in two:</p>
+
+<ul>
+<li><strong>Your frame does not appear there at all</strong> — the problem is
+  radio configuration. Channel first, then whether <code>transmit()</code> is
+  returning <code>ESP_OK</code>.</li>
+<li><strong>It appears, but the real device ignores it</strong> — the problem is
+  in the header fields, and chapter 7's parser is already printing them back to
+  you. Check PAN ID, then destination address, then whether
+  <code>buf[0]</code> is the PSDU length rather than the payload length.</li>
+</ul>
+
+<p>Remember that the chapter 7 sniffer is promiscuous, so it will show you the
+frame but will never ACK it. For a real ACK you need a genuine member of the
+PAN.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch08.html">Chapter 8: The two bytes that are not a CRC</a></span>
+  <span><a href="ch10.html">Chapter 10: Decoding an unknown payload</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>
