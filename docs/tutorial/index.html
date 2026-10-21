@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESP32-C6 and IEEE 802.15.4 — a hands-on tutorial</title>
+<meta name="description" content="Ten chapters taking a XIAO ESP32-C6 from blink to a working 802.15.4 sniffer, decoder and transmitter. Every step has a sketch you can flash.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">a hands-on tutorial in ten chapters</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<h1>Listening to 802.15.4 with an ESP32-C6</h1>
+
+<p class="lede">The ESP32-C6 has a radio most people never switch on. Underneath
+Zigbee, Thread and Matter sits plain IEEE 802.15.4, and the chip will let you
+talk to it directly — which means you can build a packet sniffer, work out what
+the devices around you are saying, and then say it back to them. This tutorial
+does all three, one flashable sketch at a time.</p>
+
+<p>It is built from a real project: six laser-safety monitors in a building,
+wired to Digi XBee radios, beaconing status to an indicator box in a format
+nobody had written down. Chapters 1 through 9 are the techniques. Chapter 10 is
+how that protocol actually fell, including the two places the obvious reading of
+the spec turned out to be wrong.</p>
+
+<div class="note">
+  <span class="label">Who this is for</span>
+  <p>You have used an Arduino before and can read C. No RF background is
+  assumed — the radio concepts are introduced where they are needed. No Zigbee
+  or Thread stack is involved anywhere; this is the raw MAC layer.</p>
+</div>
+
+<h2>What you will have built</h2>
+
+<p>By chapter 6 you have a scanner that sweeps all sixteen channels and reports
+where the traffic is:</p>
+
+<pre><code>[ch 21 / 0x15] listening...
+  ch 21  len 14  rssi  -63 dBm  lqi  11  | 61 88 46 01 0B 00 00 01 00 83 00 0B C1 0B
+  ch 21  len  5  rssi  -62 dBm  lqi   9  | 02 00 46 C1 09
+
+---- frames per channel so far ----
+  ch 14 (0x0E, 2420 MHz): 56
+  ch 21 (0x15, 2455 MHz): 119
+  ch 25 (0x19, 2475 MHz): 66</code></pre>
+
+<p>By chapter 7 the sketch reads those bytes back to you as fields, and by
+chapter 10 it reads them as English:</p>
+
+<pre><code>monitor 1: laser ON    (pan 0x0B01 src 0x0001 seq 0x46 rssi -63 dBm)
+monitor 2: laser off   (pan 0x0B01 src 0x0002 seq 0x88 rssi -62 dBm)</code></pre>
+
+<h2>Hardware</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Item</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Seeed XIAO ESP32-C6</td>
+    <td>What this tutorial was written on. Any ESP32-C6 board works; adjust the
+        LED pin in chapter 1.</td></tr>
+<tr><td>USB-C cable</td>
+    <td>A data cable. Charge-only cables are a classic hour lost.</td></tr>
+<tr><td>A second C6 <span class="muted">(optional)</span></td>
+    <td>Only chapter 9 wants one, so you can watch your own transmissions from
+        outside.</td></tr>
+<tr><td>Something transmitting <span class="muted">(optional)</span></td>
+    <td>Any Zigbee, Thread or XBee 802.15.4 device nearby. Without one the
+        receive chapters run but stay quiet — chapter 9 can supply your own
+        traffic.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="warn">
+  <span class="label">Chip support</span>
+  <p>802.15.4 hardware exists on the <strong>ESP32-C6, C5 and H2</strong>. It
+  does not exist on the original ESP32, the S2, S3, C2 or C3 — on those boards
+  <code>esp_ieee802154.h</code> will not even be found. No amount of library
+  hunting fixes that; the radio is not on the die.</p>
+</div>
+
+<h2>Software setup</h2>
+
+<ol>
+<li>Install the <strong>Arduino IDE 2.x</strong>.</li>
+<li>File &rarr; Preferences &rarr; <em>Additional board manager URLs</em>, add:
+<pre><code>https://espressif.github.io/arduino-esp32/package_esp32_index.json</code></pre></li>
+<li>Tools &rarr; Board &rarr; Boards Manager, search <strong>esp32</strong>, install
+    <strong>version 3.0.0 or later</strong>. Core 2.x does not support the C6 and
+    does not have the buffer-release function chapter 4 depends on.</li>
+<li>Tools &rarr; Board &rarr; ESP32 Arduino &rarr; <strong>XIAO_ESP32C6</strong>.</li>
+<li>Tools &rarr; <strong>USB CDC On Boot: Enabled</strong>. Without this the Serial
+    Monitor stays empty and everything looks broken. Chapter 2 is about this.</li>
+</ol>
+
+<h2>Getting the sketches</h2>
+
+<p>Each chapter has one sketch, in its own folder so the Arduino IDE will open
+it. Clone the repository and open them from <code>docs/tutorial/sketches/</code>:</p>
+
+<pre><code>git clone https://github.com/JenuC/esp32c6-tests.git
+cd esp32c6-tests/docs/tutorial/sketches
+# then File > Open... > ch01_blink/ch01_blink.ino</code></pre>
+
+<p>Or download any single sketch from the link at the top of its chapter. The
+sketches are heavily commented and stand on their own — the chapter pages are
+the narrative around them, not a transcript of them.</p>
+
+<h2>The chapters</h2>
+
+<ol class="chapters">
+<li><a href="ch01.html"><span class="num">01</span><span class="title">Blink
+  <span class="desc">Prove the toolchain works before blaming the radio for anything.</span></span></a></li>
+<li><a href="ch02.html"><span class="num">02</span><span class="title">Serial you can trust
+  <span class="desc">USB CDC, the <code>while (!Serial)</code> trap, and why a heartbeat line saves hours.</span></span></a></li>
+<li><a href="ch03.html"><span class="num">03</span><span class="title">First frames out of the air
+  <span class="desc">Enable the radio, go promiscuous, print raw packets. Contains a deliberate bug.</span></span></a></li>
+<li><a href="ch04.html"><span class="num">04</span><span class="title">The twenty frame wall
+  <span class="desc">Why chapter 3 dies after exactly 20 frames, and the one line that fixes it.</span></span></a></li>
+<li><a href="ch05.html"><span class="num">05</span><span class="title">Getting out of the callback
+  <span class="desc">The callback is an ISR. Hand frames to <code>loop()</code> through a lock-free ring buffer.</span></span></a></li>
+<li><a href="ch06.html"><span class="num">06</span><span class="title">Scanning the band
+  <span class="desc">Sweep channels 11–26, find the traffic, and understand what a scanner cannot see.</span></span></a></li>
+<li><a href="ch07.html"><span class="num">07</span><span class="title">Reading the header
+  <span class="desc">Parse 802.15.4 properly: the FCF, addressing modes, and PAN ID compression.</span></span></a></li>
+<li><a href="ch08.html"><span class="num">08</span><span class="title">The two bytes that are not a CRC
+  <span class="desc">The frame ends with RSSI and LQI, not the FCS. Proved on-device from live traffic.</span></span></a></li>
+<li><a href="ch09.html"><span class="num">09</span><span class="title">Transmitting, and getting acknowledged
+  <span class="desc">Build a frame by hand. An ACK is the only honest proof you got the header right.</span></span></a></li>
+<li><a href="ch10.html"><span class="num">10</span><span class="title">Decoding an unknown payload
+  <span class="desc">The method, and the real case study: three mystery bytes, 12,800 captured frames.</span></span></a></li>
+</ol>
+
+<h2>The frame, for reference</h2>
+
+<p>This is the shape everything in the tutorial is working towards. One real
+frame from the captures, split into its parts:</p>
+
+<div class="frame">
+  <div class="f-hdr">61 88<span>FCF</span></div>
+  <div class="f-hdr">46<span>seq</span></div>
+  <div class="f-hdr">01 0B<span>dst PAN</span></div>
+  <div class="f-hdr">00 00<span>dst addr</span></div>
+  <div class="f-hdr">01 00<span>src addr</span></div>
+  <div class="f-pay">83 00 0B<span>payload</span></div>
+  <div class="f-meta">C1 0B<span>rssi / lqi</span></div>
+</div>
+
+<p class="muted">Chapters 3–7 get you the header. Chapter 8 explains why those
+last two bytes are not the checksum the spec says they are. Chapter 10 cracks
+the three in the middle.</p>
+
+<h2>Appendices</h2>
+
+<p>Two longer write-ups from the project this tutorial came out of:</p>
+
+<ul>
+<li><a href="https://github.com/JenuC/esp32c6-tests/blob/main/docs/discussion.md">discussion.md</a> — how the two original listener
+  sketches in this repository work, and the principles behind them.</li>
+<li><a href="https://github.com/JenuC/esp32c6-tests/blob/main/docs/decoding.md">decoding.md</a> — the full decode, with the evidence
+  tables from all 12,800 captured frames.</li>
+</ul>
+
+<p>The raw captures are in
+<code>esp32-c6-listener/esp-listener-output/</code> if you want to run your own
+analysis against them, and <code>laser_xbee_esp/</code> is the ESP-IDF project
+that came out of the decode.</p>
+
+<footer class="site">
+  <p>Source and sketches:
+  <a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1: Blink — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 1</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 1</span>
+<h1>Blink</h1>
+
+<p class="lede">Prove the toolchain works end to end before touching the radio.
+This chapter exists so that later, when no frames arrive, you already know the
+board and the upload path are fine.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch01_blink/ch01_blink.ino">sketches/ch01_blink/ch01_blink.ino</a></span>
+</div>
+
+<h2>The LED</h2>
+
+<p>The XIAO ESP32-C6 user LED sits on GPIO15 and is wired <strong>active
+low</strong>: writing <code>LOW</code> lights it. That catches people out, so
+the sketch names the states instead of using the levels directly:</p>
+
+<pre><code>#define LED_PIN 15
+#define LED_ON  LOW
+#define LED_OFF HIGH</code></pre>
+
+<p>If your board lights up when it should be dark, swap the last two lines. If
+it does nothing at all, your board uses a different pin — check its pinout and
+change <code>LED_PIN</code>.</p>
+
+<p>The blink is deliberately asymmetric, 200&nbsp;ms on and 800&nbsp;ms off. A
+short flash in a long gap is unmistakable, so you can tell "my sketch is
+running" from "the board is sitting in the bootloader" at a glance across a
+desk.</p>
+
+<h2>When the upload fails</h2>
+
+<p>Three failures account for nearly all of them.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead>
+<tbody>
+<tr><td><code>esp_ieee802154.h: No such file</code> later on, or the C6 not
+        listed in the board menu</td>
+    <td>Arduino-ESP32 core 2.x. The C6 needs <strong>core 3.0.0 or
+        later</strong>. Boards Manager &rarr; esp32 &rarr; update.</td></tr>
+<tr><td>"No serial data received", or the port disappears mid-upload</td>
+    <td>Force bootloader mode: hold <strong>BOOT</strong>, tap
+        <strong>RESET</strong>, release BOOT. The port comes back under a
+        different number — reselect it and upload again.</td></tr>
+<tr><td>No port appears at all</td>
+    <td>Charge-only USB cable, or a hub that does not pass data. Try a
+        different cable directly into the machine.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+  <span class="label">Why bother</span>
+  <p>Chapter 3 switches on a radio that may legitimately have nothing to hear.
+  "No output" will be ambiguous from then on, and it is much cheaper to rule out
+  the board now than to debug a sniffer and a toolchain at the same time.</p>
+</div>
+
+<div class="pager">
+  <span>&larr; <a href="index.html">Contents</a></span>
+  <span><a href="ch02.html">Chapter 2: Serial you can trust</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

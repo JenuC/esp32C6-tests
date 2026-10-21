@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 5: Getting out of the callback — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 5</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 5</span>
+<h1>Getting out of the callback</h1>
+
+<p class="lede">The receive callback runs in interrupt context. Chapters 3 and 4
+print from inside it, which is the worst thing you can do there, and the cost is
+invisible — dropped frames leave no trace.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch05_ring_buffer/ch05_ring_buffer.ino">sketches/ch05_ring_buffer/ch05_ring_buffer.ino</a></span>
+</div>
+
+<h2>The arithmetic</h2>
+
+<p><code>esp_ieee802154_receive_done()</code> is not a task. While you are
+inside it the radio is not being serviced, so every microsecond spent there is a
+chance to miss the next frame.</p>
+
+<p>Printing is catastrophically slow by that standard. A 14-byte hex dump is
+about 42 characters, and at 115200&nbsp;baud each character is roughly
+87&nbsp;µs:</p>
+
+<pre><code>42 chars × 87 µs ≈ 3.6 ms</code></pre>
+
+<p>An 802.15.4 frame of that size occupies the air for well under a
+millisecond. So the handler for one frame blocks for several times the duration
+of the next one. On a quiet channel you never notice; on a busy one chapters 3
+and 4 are dropping frames constantly and cheerfully reporting nothing wrong.</p>
+
+<h2>Copy out, parse later</h2>
+
+<p>The callback's whole job becomes: copy the bytes somewhere safe, and
+return.</p>
+
+<pre><code>uint8_t len = frame[0];
+if (len > MAX_FRAME_LEN) len = MAX_FRAME_LEN;   // clamp before the memcpy
+
+uint8_t next = (q_head + 1) % QUEUE_LEN;
+if (next == q_tail) {
+  dropped++;                 // queue full
+} else {
+  queue[q_head].len  = len;
+  queue[q_head].rssi = frame_info ? frame_info->rssi : 0;
+  memcpy(queue[q_head].data, &amp;frame[1], len);
+  q_head = next;
+}
+esp_ieee802154_receive_handle_done(frame);</code></pre>
+
+<p>That clamp is not decoration. <code>frame[0]</code> arrives off the air, and
+a corrupt length would run straight off the end of the destination array. It
+should never fire in normal operation, which is precisely why it has to be
+there.</p>
+
+<h2>Why no lock is needed</h2>
+
+<p>This is a single-producer, single-consumer ring buffer, and that structure is
+what makes it safe without disabling interrupts or taking a mutex:</p>
+
+<ul>
+<li>the callback only ever writes <code>q_head</code></li>
+<li><code>loop()</code> only ever writes <code>q_tail</code></li>
+<li>neither one writes the other's index</li>
+</ul>
+
+<p>Both indices are <code>volatile</code> so the compiler cannot hoist them out
+of the drain loop and spin on a stale value forever.</p>
+
+<p>One ordering detail in <code>drainQueue()</code> matters more than it
+looks:</p>
+
+<pre><code>// print the frame fully, THEN release the slot
+q_tail = (q_tail + 1) % QUEUE_LEN;</code></pre>
+
+<p>Advancing <code>q_tail</code> first would let the callback overwrite the slot
+while <code>loop()</code> is still halfway through printing it, producing a
+torn frame — half of one packet, half of another. That is a bug you will never
+reproduce on demand, so it is worth getting right by construction.</p>
+
+<h2>Full means drop</h2>
+
+<p>When the queue fills, the sketch discards the <em>new</em> frame rather than
+overwriting the oldest. Both choices lose data; only one of them can corrupt a
+frame that is being printed. Losing the newest frame is recoverable and
+countable:</p>
+
+<pre><code>-- 1284 received, 0 dropped (queue full)</code></pre>
+
+<div class="note">
+  <span class="label">Try it</span>
+  <p>Set <code>QUEUE_LEN</code> to 2 and point the sketch at a busy channel.
+  The dropped counter starts climbing, and the trade-off becomes concrete: the
+  queue only has to be long enough to cover one pass of <code>loop()</code>.</p>
+</div>
+
+<h2>A better place for RSSI</h2>
+
+<p>The sketch now reads signal strength from <code>frame_info</code> rather than
+from the frame bytes:</p>
+
+<pre><code>queue[q_head].rssi = frame_info ? frame_info->rssi : 0;
+queue[q_head].lqi  = frame_info ? frame_info->lqi  : 0;</code></pre>
+
+<p>That second argument to the callback has been there since chapter 3, unused.
+It carries the receiver's own measurements of the frame. Chapter 8 is about why
+reading them from here, rather than from the end of the packet, is not merely a
+style preference.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch04.html">Chapter 4: The twenty frame wall</a></span>
+  <span><a href="ch06.html">Chapter 6: Scanning the band</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

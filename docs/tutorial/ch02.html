@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 2: Serial you can trust — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 2</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 2</span>
+<h1>Serial you can trust</h1>
+
+<p class="lede">Everything from here on is debugged through the Serial Monitor.
+A sniffer with a broken console looks exactly like a sniffer receiving nothing,
+and that confusion can cost an afternoon.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch02_serial/ch02_serial.ino">sketches/ch02_serial/ch02_serial.ino</a></span>
+</div>
+
+<h2>The trap</h2>
+
+<p>Nearly every Arduino example contains this line, and on a native-USB board
+it is a bug:</p>
+
+<pre><code>while (!Serial);   // don't</code></pre>
+
+<p>On a classic Arduino, <code>Serial</code> is a UART and that test passes
+immediately. On the C6 with USB CDC enabled, <code>Serial</code> <em>is</em> the
+USB device, and <code>!Serial</code> stays true until a host program opens the
+port. Run the board from a battery or a plain charger and it sits in that loop
+forever, looking bricked. The sketch waits, but gives up:</p>
+
+<pre><code>uint32_t deadline = millis() + 2000;
+while (!Serial &amp;&amp; millis() &lt; deadline) {
+  delay(10);
+}
+delay(300);   // the terminal still misses the first few ms</code></pre>
+
+<p>The trailing <code>delay(300)</code> covers a second quirk: even once the
+port is open the host's terminal usually drops the first handful of
+milliseconds. Without it your startup banner is the one message you never see.</p>
+
+<div class="warn">
+  <span class="label">If the monitor is empty but the LED blinks</span>
+  <p>Tools &rarr; <strong>USB CDC On Boot: Enabled</strong>, then re-upload.
+  With it disabled, <code>Serial</code> is routed to the UART pins rather than
+  the USB connector, so the sketch is talking to nobody.</p>
+</div>
+
+<h2>The heartbeat</h2>
+
+<p>The sketch prints one line a second, forever:</p>
+
+<pre><code>[  4312 ms] tick 4   heap 318404</code></pre>
+
+<p>This is the single most useful debugging tool in the tutorial, and it is
+worth understanding why before you need it. In chapter 3 the radio stops
+delivering frames. The question at that moment is whether the <em>sketch</em>
+died or the <em>radio</em> did, and those have completely different causes. A
+heartbeat on an independent timer answers it instantly: if it keeps ticking
+while frames have stopped, the code is alive and the radio is the problem.</p>
+
+<p>The free-heap column earns its place the same way. A number that drifts
+steadily downwards is a leak, and watching it is how you catch one before it
+becomes a crash an hour into a capture.</p>
+
+<h2>Checking the chip</h2>
+
+<p><code>setup()</code> also prints what it is running on:</p>
+
+<pre><code>chip: ESP32-C6  cores: 1  flash: 4194304 bytes</code></pre>
+
+<p>If that does not say C6, C5 or H2, stop here — the radio chapters cannot
+work, because the hardware does not have an 802.15.4 radio on it.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch01.html">Chapter 1: Blink</a></span>
+  <span><a href="ch03.html">Chapter 3: First frames</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

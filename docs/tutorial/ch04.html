@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 4: The twenty frame wall — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 4</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 4</span>
+<h1>The twenty frame wall</h1>
+
+<p class="lede">Chapter 3 stopped after exactly 20 frames. Not 20-ish — 20. A
+suspiciously round number is a clue, and this one points straight at the cause.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch04_buffer_wall/ch04_buffer_wall.ino">sketches/ch04_buffer_wall/ch04_buffer_wall.ino</a></span>
+</div>
+
+<h2>Reading the symptom</h2>
+
+<p>Three facts, taken together, name the bug before you look at any code:</p>
+
+<ul>
+<li><strong>It stops at a round number.</strong> Resource exhaustion, not
+  corruption. Random damage does not produce the same count twice.</li>
+<li><strong>The heartbeat keeps running.</strong> The sketch is alive. This is
+  not a crash or a hang, and chapter 2's heartbeat is what rules those out.</li>
+<li><strong>It never recovers.</strong> Whatever ran out is never given back.</li>
+</ul>
+
+<p>Something finite was consumed once per frame and never released. There are
+exactly 20 of them.</p>
+
+<h2>What the pointer actually is</h2>
+
+<p>The <code>frame</code> pointer handed to the callback is not yours and it is
+not a copy. It points into one of a pool of statically allocated receive
+buffers, sized by <code>CONFIG_IEEE802154_RX_BUFFER_SIZE</code>, which defaults
+to <strong>20</strong>.</p>
+
+<p>Each buffer stays checked out to your code until you hand it back. Chapter 3
+never did. After 20 frames the driver had nowhere to put the 21st, and the radio
+went permanently deaf.</p>
+
+<div class="warn">
+  <span class="label">The pool is global</span>
+  <p>It is not per channel. This is why the scanner in chapter 6, if it leaked,
+  would go silent across all sixteen channels at once rather than just the one it
+  was on — a symptom that sends people hunting for a channel-hopping bug that
+  does not exist.</p>
+</div>
+
+<h2>The fix</h2>
+
+<p>One line, at the end of the callback:</p>
+
+<pre><code>esp_ieee802154_receive_handle_done(frame);</code></pre>
+
+<p>Order matters. Release it <em>after</em> you have finished reading
+<code>frame</code> — once it goes back in the pool the driver may reuse it for
+the next packet at any moment. Anything you still need must be copied out first,
+which is exactly the problem <a href="ch05.html">chapter 5</a> solves properly.</p>
+
+<div class="note">
+  <span class="label">If that function does not compile</span>
+  <p>Your Arduino-ESP32 core predates IDF 5.1. Upgrade to core 3.x. There is no
+  workaround on older cores, because the function that returns a buffer does not
+  exist in them.</p>
+</div>
+
+<h2>Verifying</h2>
+
+<p>Flash the chapter 4 sketch and watch the counter walk straight past 20:</p>
+
+<pre><code>[ 20108 ms] alive, frames so far: 47
+[ 22110 ms] alive, frames so far: 52
+[ 24112 ms] alive, frames so far: 58</code></pre>
+
+<div class="ok">
+  <span class="label">A tempting non-fix</span>
+  <p>Raising <code>CONFIG_IEEE802154_RX_BUFFER_SIZE</code> makes the sniffer
+  survive 100 frames instead of 20. It feels like progress and it is not — a
+  leak is a leak, and all you have bought is a longer wait before the same
+  silence.</p>
+</div>
+
+<h2>What is still wrong</h2>
+
+<p>This sketch no longer dies, but it is still doing something it should not:
+printing from inside the callback. On a busy channel it drops frames
+continuously, silently, with no counter to tell you. That is chapter 5.</p>
+
+<p>It is worth being clear that the fix was still worth having on its own. A
+sniffer that drops some frames is useful; a sniffer that stops after 20 is not.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch03.html">Chapter 3: First frames</a></span>
+  <span><a href="ch05.html">Chapter 5: Getting out of the callback</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

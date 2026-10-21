@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 6: Scanning the band — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 6</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 6</span>
+<h1>Scanning the band</h1>
+
+<p class="lede">Stop guessing which channel to listen on. Sweep all sixteen,
+tally what arrives, and learn what a scanner structurally cannot see.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch06_scanner/ch06_scanner.ino">sketches/ch06_scanner/ch06_scanner.ino</a></span>
+</div>
+
+<h2>Why hopping is necessary</h2>
+
+<p>Sitting on one channel finds nothing if you picked the wrong one, and from
+the console that is indistinguishable from "there is no 802.15.4 traffic
+anywhere near me". Those two situations need completely different responses, so
+the ambiguity has to go.</p>
+
+<p>The loop is the chapter 5 sketch plus a channel change:</p>
+
+<pre><code>current_channel = next;
+esp_ieee802154_set_channel(next);
+esp_ieee802154_receive();   // arm once, here</code></pre>
+
+<p>Arming once per hop is the point. Calling <code>receive()</code> on a timer
+inside the dwell loop is a common habit and it is pointless — with
+<code>set_rx_when_idle(true)</code> the radio returns to RX by itself after
+every frame. The earlier sketches in this repository called it every 50&nbsp;ms
+and gained nothing from it.</p>
+
+<h2>The duty cycle, honestly</h2>
+
+<p>Sixteen channels at 2 seconds each is a 32-second sweep, so any one channel
+is being watched <strong>6.25%</strong> of the time.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>What you are looking for</th><th>Does a scanner find it</th></tr></thead>
+<tbody>
+<tr><td>A device beaconing on a timer (1&nbsp;Hz, say)</td>
+    <td>Yes. Two seconds of dwell catches one or two heartbeats every sweep.</td></tr>
+<tr><td>Which channels have networks on them</td>
+    <td>Yes. This is what a scanner is for.</td></tr>
+<tr><td>A one-off event — a button press, an alarm, a command</td>
+    <td>No. You will miss it 15 times out of 16.</td></tr>
+<tr><td>The exact timing between two frames</td>
+    <td>No. Hops insert gaps that are not in the traffic.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>So the scanner is a survey tool. Once it has told you where the traffic is,
+go back to <a href="ch05.html">chapter 5</a> and pin the radio to that channel
+for anything that needs real coverage.</p>
+
+<h2>Stamping the channel at receive time</h2>
+
+<p>The callback records which channel each frame arrived on:</p>
+
+<pre><code>queue[q_head].channel = current_channel;</code></pre>
+
+<p>This is why a frame is always labelled correctly even when it is printed just
+after a hop. Its position in the output can be misleading — a frame queued
+moments before the hop gets printed below the next channel's banner — but the
+channel number on the frame itself is the one it was received on. Worth knowing
+before you chase a phantom cross-channel leak.</p>
+
+<h2>Reading the output</h2>
+
+<pre><code>---- frames per channel so far ----
+  ch 14 (0x0E, 2420 MHz): 56
+  ch 16 (0x10, 2430 MHz): 54
+  ch 17 (0x11, 2435 MHz): 55
+  ch 18 (0x12, 2440 MHz): 36
+  ch 21 (0x15, 2455 MHz): 119
+  ch 25 (0x19, 2475 MHz): 66
+-----------------------------------</code></pre>
+
+<p>That is a real sweep from this project: six channels busy, ten silent. A
+channel that lights up consistently on every sweep has a network on it. A single
+frame on one channel in one sweep is usually a neighbour's device, or noise that
+happened to pass CRC.</p>
+
+<div class="note">
+  <span class="label">Channel numbers in hex</span>
+  <p>The summary prints both, because device documentation and configuration
+  tools disagree about which to use. Digi's XBee tools write the channel in hex,
+  so <code>CH = 15</code> in an XBee profile means channel
+  <strong>0x15 = 21 decimal</strong>, not channel 15. This tutorial's repository
+  contains a sketch named <code>esp32-c6-listen-HEX15</code> that listens on
+  channel 16 while its comments claim 15, which is what that confusion looks
+  like in practice.</p>
+</div>
+
+<h2>What a quiet channel does not prove</h2>
+
+<p>Wi-Fi occupies the same band and is far louder. A channel that reads as empty
+here may simply be sitting underneath an access point, with 802.15.4 frames
+being lost to interference rather than absent. If a device is supposed to be on
+a channel and the scanner cannot see it, moving the board closer is a cheaper
+test than assuming the device is off.</p>
+
+<div class="pager">
+  <span>&larr; <a href="ch05.html">Chapter 5: Getting out of the callback</a></span>
+  <span><a href="ch07.html">Chapter 7: Reading the header</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

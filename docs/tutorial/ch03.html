@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 3: First frames out of the air — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 3</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 3</span>
+<h1>First frames out of the air</h1>
+
+<p class="lede">Switch the radio on and print raw packets. Thirty lines of code
+gets you a working packet sniffer — and a bug that takes the rest of this
+chapter and all of the next one to understand.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch03_first_frames/ch03_first_frames.ino">sketches/ch03_first_frames/ch03_first_frames.ino</a></span>
+</div>
+
+<div class="warn">
+  <span class="label">This sketch is deliberately broken</span>
+  <p>It works, then stops. Run it, watch the frame counter, and write down the
+  number it stops at before you read chapter 4. The number is the lesson.</p>
+</div>
+
+<h2>The channels</h2>
+
+<p>802.15.4 has sixteen channels, numbered 11 to 26, spaced 5&nbsp;MHz apart:</p>
+
+<pre><code>centre frequency = 2405 + 5 × (channel − 11)  MHz</code></pre>
+
+<p>So channel 11 is 2405&nbsp;MHz and channel 26 is 2480&nbsp;MHz. That is the
+same 2.4&nbsp;GHz band as Wi-Fi, which matters later: a channel that looks
+quiet may just be buried under an access point.</p>
+
+<p>The sketch hard-codes channel 21. If that is the wrong guess you will see
+nothing at all, which is indistinguishable from a broken sketch — chapter 6
+builds the scanner that removes the guesswork.</p>
+
+<h2>Four calls to start a radio</h2>
+
+<pre><code>esp_ieee802154_enable();                // power up the subsystem
+esp_ieee802154_set_promiscuous(true);   // deliver everything
+esp_ieee802154_set_rx_when_idle(true);  // stay in RX by itself
+esp_ieee802154_set_channel(CHANNEL);
+esp_ieee802154_receive();               // enter the receive state</code></pre>
+
+<p>The IDF headers are C, so the include needs wrapping or the linker will not
+find any of these:</p>
+
+<pre><code>extern "C" {
+  #include "esp_ieee802154.h"
+}</code></pre>
+
+<h3>Promiscuous mode is what makes a sniffer</h3>
+
+<p>Normally the MAC hardware filters incoming frames by PAN ID and address, and
+drops everything not meant for it before software ever sees it. Promiscuous mode
+switches that off, so you get every frame on the channel.</p>
+
+<p>It has two consequences worth knowing now, because they explain things that
+look like bugs later:</p>
+
+<ul>
+<li><strong>A promiscuous node never ACKs.</strong> Automatic acknowledgement is
+  part of the filtering machinery, so it goes away too. Your sniffer is
+  completely invisible — which is usually what you want, and is why a second C6
+  running chapter 7 will not acknowledge the transmitter in chapter 9.</li>
+<li><strong><code>set_panid()</code> and <code>set_short_address()</code> stop
+  mattering.</strong> They configure the filter you just disabled. Calling them
+  anyway is harmless, and also does nothing.</li>
+</ul>
+
+<h2>The callback</h2>
+
+<p>The driver calls this function when a frame passes CRC. You do not register
+it; you simply define a function with this exact name and signature, and it gets
+linked in:</p>
+
+<pre><code>extern "C" void esp_ieee802154_receive_done(uint8_t *frame,
+                                            esp_ieee802154_frame_info_t *frame_info)</code></pre>
+
+<p>The buffer layout is the part to memorise:</p>
+
+<div class="frame">
+  <div class="f-meta">frame[0]<span>length</span></div>
+  <div class="f-hdr">frame[1] … frame[len]<span>the PSDU</span></div>
+</div>
+
+<p><code>frame[0]</code> is the PSDU length <em>including</em> the two-byte FCS
+field, so a frame reported as 14 bytes carries 12 bytes of header and payload.
+Chapter 8 is about what is really in those last two bytes, and it is not what
+the spec leads you to expect.</p>
+
+<h2>What you should see</h2>
+
+<pre><code>=== Chapter 3: first frames ===
+Listening on channel 21 (2455 MHz)
+Watch the frame counter. Note where it stops.
+
+#1  len 14  | 61 88 46 01 0B 00 00 01 00 83 00 0B C1 0B
+#2  len 5   | 02 00 46 C1 09
+#3  len 14  | 61 88 88 01 0B 00 00 02 00 52 00 14 C2 0A
+...
+[  8102 ms] alive, frames so far: 20
+[ 10104 ms] alive, frames so far: 20
+[ 12106 ms] alive, frames so far: 20</code></pre>
+
+<p>Frames arrive, then stop. The heartbeat keeps running, so — by chapter 2's
+logic — the sketch is alive and the radio is not. Note the count it froze at.</p>
+
+<div class="note">
+  <span class="label">If you see nothing at all</span>
+  <p>Most likely there is genuinely no traffic on channel 21 where you are.
+  You can skip ahead to <a href="ch06.html">chapter 6</a>, find a channel that
+  is busy, come back and change <code>CHANNEL</code>. If nothing is transmitting
+  anywhere near you, <a href="ch09.html">chapter 9</a> turns a second board into
+  your traffic source.</p>
+</div>
+
+<div class="pager">
+  <span>&larr; <a href="ch02.html">Chapter 2: Serial</a></span>
+  <span><a href="ch04.html">Chapter 4: The twenty frame wall</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>

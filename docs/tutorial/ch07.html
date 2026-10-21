@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 7: Reading the header — ESP32-C6 &amp; 802.15.4</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="home" href="index.html">ESP32-C6 &amp; 802.15.4</a>
+    <span class="crumb">Chapter 7</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<span class="chapter-tag">Chapter 7</span>
+<h1>Reading the header</h1>
+
+<p class="lede">Stop staring at hex. Everything up to the payload is plain
+802.15.4 — identical for Zigbee, Thread and XBee — so parse it once and the
+sketch can tell you who is talking to whom, and exactly where the payload
+starts.</p>
+
+<div class="sketch">
+  <strong>Sketch</strong>
+  <span class="path"><a href="sketches/ch07_parse_header/ch07_parse_header.ino">sketches/ch07_parse_header/ch07_parse_header.ino</a></span>
+</div>
+
+<h2>Little-endian, everywhere</h2>
+
+<p>Every multi-byte field in this header is little-endian. The bytes
+<code>61 88</code> on the wire are the 16-bit value <strong>0x8861</strong>.
+Reading them in the wrong order is the single most common mistake when decoding
+these frames by hand, and it produces a frame type that makes no sense, which at
+least fails loudly.</p>
+
+<h2>The Frame Control Field</h2>
+
+<p>Those first two bytes decide the shape of everything after them:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Bits</th><th>Field</th><th>In 0x8861</th></tr></thead>
+<tbody>
+<tr><td>0–2</td><td>Frame type</td><td><code>001</code> — Data</td></tr>
+<tr><td>3</td><td>Security enabled</td><td>0</td></tr>
+<tr><td>4</td><td>Frame pending</td><td>0</td></tr>
+<tr><td>5</td><td>ACK request</td><td>1 — sender wants an ACK</td></tr>
+<tr><td>6</td><td>PAN ID compression</td><td>1 — source PAN omitted</td></tr>
+<tr><td>10–11</td><td>Destination addressing mode</td><td><code>10</code> — 16-bit short</td></tr>
+<tr><td>12–13</td><td>Frame version</td><td>0</td></tr>
+<tr><td>14–15</td><td>Source addressing mode</td><td><code>10</code> — 16-bit short</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Frame types are 0&nbsp;beacon, 1&nbsp;data, 2&nbsp;acknowledgment,
+3&nbsp;MAC command. Addressing modes are 0&nbsp;none, 2&nbsp;short (16-bit),
+3&nbsp;extended (64-bit) — mode 1 is reserved.</p>
+
+<h2>Why the header is variable length</h2>
+
+<p>Three of those fields change the size of what follows, which is why fixed
+byte offsets do not work:</p>
+
+<pre><code>FCF              2 bytes, always
+sequence number  1 byte, always
+dest PAN         2 bytes, if dest mode != none
+dest address     2 or 8 bytes, per dest mode
+src PAN          2 bytes, ONLY if src mode != none AND NOT pan_compress
+src address      2 or 8 bytes, per src mode
+payload          whatever is left</code></pre>
+
+<p>PAN ID compression is the one that catches people. When it is set, both
+endpoints are in the same PAN, so the source PAN ID is simply not transmitted —
+the header is two bytes shorter than a naive reading expects, and every field
+after it shifts. A parser that ignores that bit reads the payload starting two
+bytes early and produces plausible-looking nonsense.</p>
+
+<p>The sketch's parser handles all the combinations and bounds-checks every
+read against the frame length, so a truncated frame is rejected rather than
+read off the end.</p>
+
+<h2>A worked example</h2>
+
+<p>One real frame from the captures in this repository:</p>
+
+<div class="frame">
+  <div class="f-hdr">61 88<span>FCF</span></div>
+  <div class="f-hdr">46<span>seq</span></div>
+  <div class="f-hdr">01 0B<span>dst PAN</span></div>
+  <div class="f-hdr">00 00<span>dst addr</span></div>
+  <div class="f-hdr">01 00<span>src addr</span></div>
+  <div class="f-pay">83 00 0B<span>payload</span></div>
+  <div class="f-meta">C1 0B<span>rssi / lqi</span></div>
+</div>
+
+<p>Destination PAN 0x0B01, destination 0x0000, source 0x0001. No source PAN
+appears because compression is on. What the sketch prints:</p>
+
+<pre><code>len 14  rssi  -63 dBm  lqi  11  | 61 88 46 01 0B 00 00 01 00 83 00 0B C1 0B
+    FCF 0x8861  Data, ACK requested, PAN compressed, ver 0
+    seq 0x46 (70)
+    dst  pan 0x0B01  addr 0x0000
+    src  pan 0x0B01 (implied)  addr 0x0001   [short/short addressing]
+    payload 3 bytes at offset 9: 83 00 0B
+    as text: "..."</code></pre>
+
+<p>Compare an ACK, which carries no addressing fields at all and so is five
+bytes:</p>
+
+<pre><code>len  5  rssi  -62 dBm  lqi   7  | 02 00 51 C3 07
+    FCF 0x0002  Ack, ver 0
+    seq 0x51 (81)
+    dst  none
+    src  none   [none/none addressing]
+    payload 0 bytes at offset 3:</code></pre>
+
+<p>Its sequence number matches a data frame sent moments earlier. That is the
+whole mechanism — an ACK identifies what it is acknowledging by sequence number
+and nothing else.</p>
+
+<h2>The ASCII column</h2>
+
+<p>The sketch renders the payload as text as well as hex. When you do not know
+what a protocol is, this is the fastest possible triage: readable strings mean
+the payload is text or has text in it, and you are nearly done. All dots means
+it is binary and packed, and you are headed for
+<a href="ch10.html">chapter 10</a>.</p>
+
+<p>For these monitors it was all dots.</p>
+
+<div class="note">
+  <span class="label">Two bytes short</span>
+  <p>The parser computes <code>mac_len = psdu_len - 2</code> because the last
+  two bytes of a received PSDU are not part of the MAC frame. That is the
+  subject of the next chapter, and getting it wrong is how a 3-byte payload
+  looks like a 5-byte one with two fields that never quite make sense.</p>
+</div>
+
+<div class="pager">
+  <span>&larr; <a href="ch06.html">Chapter 6: Scanning the band</a></span>
+  <span><a href="ch08.html">Chapter 8: The two bytes that are not a CRC</a> &rarr;</span>
+</div>
+
+<footer class="site">
+  <p><a href="https://github.com/JenuC/esp32c6-tests">github.com/JenuC/esp32c6-tests</a></p>
+</footer>
+
+</div>
+</body>
+</html>
