@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <profile>
+    <profile_version>1</profile_version>
+    <description_file>XBRR-24A/XBRR-24A_2014-th.xml</description_file>
+    <flash_fw_action>1</flash_fw_action>
+    <description xml:space="preserve"></description>
+    <reset_settings>false</reset_settings>
+    <format_file_system>false</format_file_system>
+    <settings>
+      <setting command="CH">F</setting>
+      <setting command="ID">F01</setting>
+      <setting command="MM">0</setting>
+      <setting command="C8">0</setting>
+      <setting command="NI">0x20</setting>
+      <setting command="DD">190000</setting>
+      <setting command="NT">19</setting>
+      <setting command="NO">0</setting>
+      <setting command="CE">0</setting>
+      <setting command="A1">0</setting>
+      <setting command="A2">0</setting>
+      <setting command="SC">FFFF</setting>
+      <setting command="MY">2</setting>
+      <setting command="DH">0</setting>
+      <setting command="DL">0</setting>
+      <setting command="RR">0</setting>
+      <setting command="TO">0</setting>
+      <setting command="EE">0</setting>
+      <setting command="KY"></setting>
+      <setting command="DM">0</setting>
+      <setting command="US">0</setting>
+      <setting command="SA">0</setting>
+      <setting command="*S">0</setting>
+      <setting command="*V">0</setting>
+      <setting command="*W">0</setting>
+      <setting command="*X">0</setting>
+      <setting command="*Y">0</setting>
+      <setting command="PL">4</setting>
+      <setting command="CA">32</setting>
+      <setting command="RN">0</setting>
+      <setting command="EA">2</setting>
+      <setting command="EC">0</setting>
+      <setting command="SM">0</setting>
+      <setting command="SP">0</setting>
+      <setting command="ST">7D0</setting>
+      <setting command="DP">3E8</setting>
+      <setting command="SN">1</setting>
+      <setting command="SO">0</setting>
+      <setting command="BT">0</setting>
+      <setting command="BI">0x20</setting>
+      <setting command="BP">3</setting>
+      <setting command="$S">0</setting>
+      <setting command="$V">0</setting>
+      <setting command="$W">0</setting>
+      <setting command="$X">0</setting>
+      <setting command="$Y">0</setting>
+      <setting command="AP">0</setting>
+      <setting command="AO">2</setting>
+      <setting command="AZ">0</setting>
+    </settings>
+  </profile>
+</data>
