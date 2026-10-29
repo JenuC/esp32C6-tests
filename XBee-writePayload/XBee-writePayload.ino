@@ -45,7 +45,7 @@ SoftwareSerial XBee(2, 3); // RX set to pin 2 of arduino, TX set to pin 3 of ard
 
 //------------------------------------
 //Specify the ID of the control box
-const int laserLabel = 1;
+const int laserLabel = 2;
 
 //-------------------------------------
 
@@ -88,7 +88,7 @@ void setup() {
 
 
 void loop() {
-  out = 11;  // 1*10 + 1(ON) , 1*10+0(OFF) , 10,11,20,21
+  out = 21;  // 1*10 + 1(ON) , 1*10+0(OFF) , 10,11,20,21
  
   //send signal every 50+random(20) ms. The random number is for avoiding collisions
   unsigned long currMillis = millis(); //provides current timestamp
